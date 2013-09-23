@@ -2,9 +2,9 @@
  * jQuery async plugin
  *
  * @fileoverview  jQuery async plugin
- * @version       0.0.1
- * @date          2013-09-23
- * @link          https://github.com/polygonplanet/jQuery-async
+ * @version       0.0.2
+ * @date          2013-09-24
+ * @link          https://github.com/polygonplanet/jquery-async-plugin
  * @copyright     Copyright (c) 2013 polygon planet <polygon.planet.aqua@gmail.com>
  * @license       Licensed under the MIT license.
  */
