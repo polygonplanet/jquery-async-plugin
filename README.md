@@ -66,7 +66,7 @@ $.async(function() {
     return 'hello';
 }).addBoth(function(res) {
     console.log(res); // hello
-}).callback();
+});
 ```
 
 ## License
