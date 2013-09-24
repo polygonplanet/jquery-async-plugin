@@ -5,7 +5,7 @@ jQuery async plugin adds **Deferred** to handle like the [Mochikit.Async.Deferre
 
 This plugin adds the Deferred functions to jQuery.Deferred object, but it does not conflict with other plugins.
 jQuery.Deferred keeps original functions.
-jQuery object is added only "**async**" function object.
+jQuery object is added only **async** function object.
 
 
 ## Installation
@@ -14,6 +14,8 @@ Include script after the jQuery library:
 
 ```html
 <script src="/path/to/jquery.async.js"></script>
+or
+<script src="/path/to/jquery.async.min.js"></script>
 ```
 
 $.async() is a shortcut function faster way of creating new Deferred sequence.
@@ -86,7 +88,7 @@ var d = $.Deferred();
 
 The following callback methods has been added.
 
-#### [addCallback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback)(*function* callback) *Deferred*
+#### [addCallback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback)\(*function* callback\) *Deferred*
 
 Add a single callback to the end of the callback sequence.
 
