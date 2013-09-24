@@ -88,27 +88,27 @@ var d = $.Deferred();
 
 The following callback methods has been added.
 
-#### [addCallback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback)\(*function* callback\) *Deferred*
+#### [addCallback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallback)( *function* callback) *Deferred*
 
 Add a single callback to the end of the callback sequence.
 
-#### [addErrback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.adderrback)(*function* errback) *Deferred*
+#### [addErrback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.adderrback)( *function* errback) *Deferred*
 
 Add a single errback to the end of the callback sequence.
 
-#### [addBoth](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addboth)(*function* func) *Deferred*
+#### [addBoth](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addboth)( *function* func) *Deferred*
 
 Add the same function as both a callback and an errback as the next element on the callback sequence. This is useful for code that you want to guarantee to run.
 
-#### [addCallbacks](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks)(*function* callback, *function* errback) *Deferred*
+#### [addCallbacks](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.addcallbacks)( *function* callback, *function* errback) *Deferred*
 
 Add separate callback and errback to the end of the callback sequence. Either callback or errback may be null, but not both.
 
-#### [callback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.callback)([*** result]) *Deferred*
+#### [callback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.callback)([ \* result]) *Deferred*
 
 Begin the callback sequence with a non-Error result. Result may be any value except for a Deferred.
 
-#### [errback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.errback)([*** result]) *Deferred*
+#### [errback](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-deferred.prototype.errback)([ \* result]) *Deferred*
 
 Begin the callback sequence with an error result. Result may be any value except for a Deferred.
 
@@ -139,7 +139,7 @@ d.addCallback() {
 d.callback();
 ```
 
-### $.async(*function* func) *Deferred*
+### $.async( *function* func) *Deferred*
 
 A shortcut faster way of creating new Deferred sequence.
 
@@ -151,7 +151,7 @@ $.async(function() {
 });
 ```
 
-### $.async.[succeed](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-succeed)([*** result]) *Deferred*
+### $.async.[succeed](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-succeed)([ \* result]) *Deferred*
 
 Return a Deferred that has already had .callback(result) called.
 
@@ -161,7 +161,7 @@ $.async.succeed(1).addCallback(function(res) {
 });
 ```
 
-### $.async.[fail](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-fail)([*** result]) *Deferred*
+### $.async.[fail](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-fail)([ \* result]) *Deferred*
 
 Return a Deferred that has already had .errback(result) called.
 
@@ -171,7 +171,7 @@ $.async.fail(1).addErrback(function(err) {
 });
 ```
 
-### $.async.[maybeDeferred](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-maybedeferred)(*** func) *Deferred*
+### $.async.[maybeDeferred](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-maybedeferred)( \* func) *Deferred*
 
 Call a func with the given arguments and ensure the result is a Deferred.
 
@@ -184,7 +184,7 @@ $.async.maybeDeferred( random ? d : s ).addCallback(function(res) {
 });
 ```
 
-### $.async.maybeDeferreds(*** ...args) *Array*
+### $.async.maybeDeferreds( \* ...args) *Array*
 
 Return an array of Deferred instances.
 
@@ -200,7 +200,7 @@ list[0].addCallback(function(res) {
 });
 ```
 
-### $.async.[wait](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-wait)(*Number* seconds[, *** res]) *Deferred*
+### $.async.[wait](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-wait)( *number* seconds[, \* res]) *Deferred*
 
 Return a new cancellable Deferred that will .callback(res) after at least seconds seconds have elapsed.
 
@@ -215,7 +215,7 @@ $.async.wait(5).addCallback(function() {
 });
 ```
 
-### $.async.[callLater](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-calllater)(*Number* seconds, *funcion* func[, *** args...]) *Deferred*
+### $.async.[callLater](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-calllater)( *number* seconds, *funcion* func[, \* args...]) *Deferred*
 
 Call func(args...) after at least seconds seconds have elapsed.
 
@@ -231,7 +231,7 @@ $.async.callLater(1, function() {
 });
 ```
 
-### $.async.till(*function* cond) *Deferred*
+### $.async.till( *function* cond) *Deferred*
 
 Wait until the condition completed. If true returned, waiting state will end.
 
