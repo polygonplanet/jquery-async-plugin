@@ -3,6 +3,7 @@
   "title": "jQuery async",
   "description": "jQuery async plugin adds Deferred to handle like the Mochikit.Async.Deferred.",
   "keywords": [
+    "jquery",
     "deferred",
     "promise",
     "async",
