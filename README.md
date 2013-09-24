@@ -139,7 +139,7 @@ d.addCallback() {
 d.callback();
 ```
 
-### $.async( *function* func) *Deferred*
+#### $.async( *function* func) *Deferred*
 
 A shortcut faster way of creating new Deferred sequence.
 
@@ -151,7 +151,7 @@ $.async(function() {
 });
 ```
 
-### $.async.[succeed](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-succeed)([ \* result]) *Deferred*
+#### $.async.[succeed](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-succeed)([ \* result]) *Deferred*
 
 Return a Deferred that has already had .callback(result) called.
 
@@ -161,7 +161,7 @@ $.async.succeed(1).addCallback(function(res) {
 });
 ```
 
-### $.async.[fail](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-fail)([ \* result]) *Deferred*
+#### $.async.[fail](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-fail)([ \* result]) *Deferred*
 
 Return a Deferred that has already had .errback(result) called.
 
@@ -171,7 +171,7 @@ $.async.fail(1).addErrback(function(err) {
 });
 ```
 
-### $.async.[maybeDeferred](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-maybedeferred)( \* func) *Deferred*
+#### $.async.[maybeDeferred](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-maybedeferred)( \* func) *Deferred*
 
 Call a func with the given arguments and ensure the result is a Deferred.
 
@@ -184,7 +184,7 @@ $.async.maybeDeferred( random ? d : s ).addCallback(function(res) {
 });
 ```
 
-### $.async.maybeDeferreds( \* ...args) *Array*
+#### $.async.maybeDeferreds( \* ...args) *Array*
 
 Return an array of Deferred instances.
 
@@ -200,7 +200,7 @@ list[0].addCallback(function(res) {
 });
 ```
 
-### $.async.[wait](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-wait)( *number* seconds[, \* res]) *Deferred*
+#### $.async.[wait](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-wait)( *number* seconds[, \* res]) *Deferred*
 
 Return a new cancellable Deferred that will .callback(res) after at least seconds seconds have elapsed.
 
@@ -215,7 +215,7 @@ $.async.wait(5).addCallback(function() {
 });
 ```
 
-### $.async.[callLater](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-calllater)( *number* seconds, *funcion* func[, \* args...]) *Deferred*
+#### $.async.[callLater](http://mochi.github.io/mochikit/doc/html/MochiKit/Async.html#fn-calllater)( *number* seconds, *funcion* func[, \* args...]) *Deferred*
 
 Call func(args...) after at least seconds seconds have elapsed.
 
@@ -231,7 +231,7 @@ $.async.callLater(1, function() {
 });
 ```
 
-### $.async.till( *function* cond) *Deferred*
+#### $.async.till( *function* cond) *Deferred*
 
 Wait until the condition completed. If true returned, waiting state will end.
 
