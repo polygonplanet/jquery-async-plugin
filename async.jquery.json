@@ -26,7 +26,7 @@
   "bugs": "https://github.com/polygonplanet/jquery-async-plugin/issues",
   "homepage": "https://github.com/polygonplanet/jquery-async-plugin",
   "docs": "https://github.com/polygonplanet/jquery-async-plugin",
-  "download": "https://github.com/polygonplanet/jquery-async-plugin",
+  "download": "https://github.com/polygonplanet/jquery-async-plugin/releases",
   "dependencies": {
     "jquery": ">=2.0.3"
   }
