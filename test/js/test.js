@@ -1,8 +1,7 @@
 /*
  * jQuery async plugin - TestRun
- *
  */
-var TestRun = function() {
+var TestRun = (function() {
   'use strict';
 
   var slice = Array.prototype.slice,
@@ -44,6 +43,16 @@ var TestRun = function() {
     },
     expect: 2
   }, {
+    title: '$.async.fail() test',
+    code: function() {
+      return $.async.fail(1).addCallback(function(res) {
+        return 'error';
+      }).addErrback(function(err) {
+        return $.async.isError(err);
+      })
+    },
+    expect: true
+  }, {
     title: 'Deferred callback response',
     code: function() {
       return $.Deferred().addCallback(function(res) {
@@ -69,13 +78,92 @@ var TestRun = function() {
         return 'hoge';
       }).addBoth(function(res) {
         r.push(res);
-        return res + 1;
+        return $.Deferred().addCallback(function(i) {
+          return res + i;
+        }).callback(1);
       }).addCallback(function(res) {
         r.push(res);
         return r;
       }).callback(1);
     },
     expect: [1, 2, new Error('error'), 'hoge', 'hoge1']
+  }, {
+    title: 'Native $.Deferred() test',
+    code: function() {
+      var test = function() {
+        var d = $.Deferred();
+
+        setTimeout(function() {
+          d.resolve();
+        }, 1000);
+
+        return d.promise();
+      };
+
+      var d = $.Deferred();
+      var i = 0;
+      var start = Date.now();
+
+      test().then(function() {
+        d.callback(++i);
+      });
+
+      if (i !== 0) {
+        throw new Error('error');
+      }
+
+      return d.addCallback(function(i) {
+        return Date.now() - start >= 1000 && i;
+      });
+    },
+    expect: 1
+  }, {
+    title: 'Cancel Deferred chain',
+    code: function() {
+      var d = $.Deferred();
+
+      d.addCallback(function(res) {
+        return res + 1;
+      });
+
+      d.cancel();
+      d.addCallback(function(res) {
+        return res + 1;
+      });
+
+      return d.callback(1);
+    },
+    expect: 2
+  }, {
+    title: 'Cancel Deferred chain in callback',
+    code: function() {
+      var d = $.Deferred();
+
+      return d.addCallback(function(res) {
+        return res + 1;
+      }).addCallback(function(res) {
+        d.cancel();
+        return res + 1;
+      }).addCallback(function(res) {
+        return res + 1;
+      }).callback(1);
+    },
+    expect: 3
+  }, {
+    title: 'Cancel Deferred chain in callback use this',
+    code: function() {
+      var d = $.Deferred();
+
+      return d.addCallback(function(res) {
+        return res + 1;
+      }).addCallback(function(res) {
+        this.cancel();
+        return res + 1;
+      }).addCallback(function(res) {
+        return res + 1;
+      }).callback(1);
+    },
+    expect: 3
   }, {
     title: '$.async() test',
     code: function() {
@@ -87,21 +175,82 @@ var TestRun = function() {
     },
     expect: 2
   }, {
-    title: 'testパターン思いつかない',
+    title: '$.async.maybeDeferred() test',
     code: function() {
-      return $.async(function() {
-        return '少しずつ';
+      return $.async.maybeDeferred(function() {
+        return 1;
       }).addCallback(function(res) {
-        return res + 'パターン';
-      }).addCallback(function(res) {
-        return res + '増やし中';
-      }).addBoth(function(res) {
-        return res + '・・・';
+        return $.async.maybeDeferred(1).addCallback(function(r) {
+          return res + r;
+        });
       });
     },
-    expect: 'tesst'
-  }];
+    expect: 2
+  }, {
+    title: '$.async.maybeDeferreds() test',
+    code: function() {
+      var list = $.async.maybeDeferreds(1, 2, 'foo', 'bar',
+                                        function() { return 5 },
+                                        $.async.succeed(100));
 
+      for (var i = 0, len = list.length; i < len; i++) {
+        if (!$.async.isDeferred(list[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+    expect: true
+  }, {
+    title: '$.async.wait() test',
+    code: function() {
+      var start = Date.now();
+
+      return $.async.wait(1).addCallback(function() {
+        return Date.now() - start >= 1000;
+      });
+    },
+    expect: true
+  }, {
+    title: '$.async.callLater() test',
+    code: function() {
+      var start = Date.now();
+
+      return $.async.callLater(1, function() {
+        return 1000;
+      }).addCallback(function(time) {
+        return time === 1000 && Date.now() - start >= time;
+      });
+    },
+    expect: true
+  }, {
+    title: '$.async.till() test',
+    code: function() {
+      var value = null;
+
+      $.async.wait(1).addCallback(function() {
+        value = 1;
+      });
+
+      if (value !== null) {
+        throw new Error('error');
+      }
+
+      var start = Date.now();
+      return $.async.till(function() {
+        return value !== null;
+      }).addCallback(function() {
+        if (Date.now() - start >= 1000) {
+          return true;
+        }
+        return false;
+      }).addCallback(function(res) {
+        return res === true && value === 1;
+      })
+    },
+    expect: true
+  }];
 
 
   function exec() {
@@ -178,6 +327,13 @@ var TestRun = function() {
       ], function(i, el) {
         el.appendTo('#result');
       });
+
+      if (results.success.length === 0) {
+        $('.test-unit-result-success').hide();
+      }
+      if (results.failure.length === 0) {
+        $('.test-unit-result-failure').hide();
+      }
     }
   }
 
@@ -385,9 +541,8 @@ var TestRun = function() {
     exec: exec,
     results: results
   };
-}();
+}());
 
-$(function() {
+$(document).ready(function() {
   TestRun.exec();
 });
-

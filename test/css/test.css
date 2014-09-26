@@ -1,0 +1,130 @@
+/*
+ * jQuery async plugin - TestRun
+ */
+
+* {
+  font-family: tahoma, verdana, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: #555;
+  background: #f8f8ff;
+  text-align: center;
+}
+
+.container {
+  margin: 0 auto;
+  text-align: left;
+  max-width: 960px;
+}
+
+pre, code {
+  font-family: Consolas, 'Courier New', Courier, Monaco, monospace;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.test-unit {
+  padding: 1em;
+  margin: 1em;
+}
+
+.test-unit-title {
+  font-weight: bold;
+}
+
+.test-unit-code {
+  margin: 1em;
+  padding: 1em;
+  color: #333;
+  background: #f2f2fc;
+  border: 1px solid #7575c1;
+  white-space: pre;
+  white-space: pre-wrap;
+}
+
+.test-unit-expect {
+  float: left;
+  color: #117733;
+  padding: 0.5em;
+}
+
+.test-unit-actual {
+  float: left;
+  margin-top: 1em;
+  padding: 0.5em;
+}
+
+.test-unit-expect-wrapper, .test-unit-result-wrapper {
+  margin: 1em;
+  padding: 1em;
+  border: 1px solid #7575c1;
+}
+
+.test-unit-expect-wrapper {
+  background: #e2f8e8;
+}
+
+.test-unit-result-wrapper {
+  background: #e2e2f8;
+}
+
+.test-unit-expect-text, .test-unit-actual-text {
+  float: left;
+  color: #333;
+  margin-right: 1em;
+}
+
+.test-unit-success {
+  color: #3544d1;
+}
+
+.test-unit-failure {
+  color: #c94754;
+}
+
+hr {
+  border: 1px solid #ccc;
+}
+
+.test-unit-result-end {
+  font-size: 130%;
+  font-weight: bold;
+  color: #333;
+}
+
+.test-unit-result-length {
+  font-size: 110%;
+  font-weight: bold;
+}
+
+.test-unit-result-success {
+  color: #3544d1;
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.test-unit-result-failure {
+  color: #c94754;
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  width: 0;
+  height: 0;
+  max-width: 1px;
+  max-height: 1px;
+  font-size: 0;
+  line-height: 0;
+  clear: both;
+  overflow: hidden;
+  visibility: hidden;
+}
