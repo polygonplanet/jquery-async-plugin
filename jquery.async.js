@@ -2,119 +2,25 @@
  * jQuery async plugin
  *
  * @fileoverview  jQuery async plugin
- * @version       0.0.2
- * @date          2013-09-24
+ * @version       0.1.0
+ * @date          2014-09-27
  * @link          https://github.com/polygonplanet/jquery-async-plugin
- * @copyright     Copyright (c) 2013 polygon planet <polygon.planet.aqua@gmail.com>
+ * @copyright     Copyright (c) 2013-2014 polygon planet <polygon.planet.aqua@gmail.com>
  * @license       Licensed under the MIT license.
  */
 /*
  * Portions of this code are from MochiKit.Async, received by the jQuery.async
  * authors under the MIT license.
  */
+
 (function($) {
 'use strict';
 
 var slice = Array.prototype.slice;
 
-// Call the function in the background (i.e. in non-blocking)
-var lazy = function() {
-  var byTick = function() {
-    if (typeof process === 'object' && typeof process.nextTick === 'function') {
-      return process.nextTick;
-    }
-  }(),
-  byImmediate = function() {
-    if (typeof setImmediate === 'function') {
-      return function(callback) {
-        try {
-          return setImmediate(callback);
-        } catch (e) {
-          return (byImmediate = byTimer)(callback);
-        }
-      };
-    }
-  }(),
-  byMessage = function() {
-    var channel, queue;
-
-    if (typeof MessageChannel !== 'function') {
-      return false;
-    }
-
-    try {
-      channel = new MessageChannel();
-      if (!channel.port1 || !channel.port2) {
-        return false;
-      }
-      queue = [];
-      channel.port1.onmessage = function() {
-        queue.shift()();
-      };
-    } catch (e) {
-      return false;
-    }
-
-    return function(callback) {
-      queue.push(callback);
-      channel.port2.postMessage('');
-    };
-  }(),
-  byEvent = function() {
-    var data;
-
-    if (typeof window !== 'object' || typeof document !== 'object' ||
-        typeof Image !== 'function' ||
-        typeof document.addEventListener !== 'function'
-    ) {
-      return false;
-    }
-
-    try {
-      if (typeof new Image().addEventListener !== 'function') {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
-
-    // Dummy 1x1 gif image.
-    data = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
-
-    return function(callback) {
-      var done,
-          img = new Image(),
-          handler = function() {
-            img.removeEventListener('load', handler, false);
-            img.removeEventListener('error', handler, false);
-            if (!done) {
-              done = true;
-              callback();
-            }
-          };
-
-      img.addEventListener('load', handler, false);
-      img.addEventListener('error', handler, false);
-
-      try {
-        img.src = data;
-      } catch (e) {
-        (byEvent = byTimer)(callback);
-      }
-    };
-  }(),
-  byTimer = function(callback, msec) {
-    return setTimeout(callback, msec || 0);
-  };
-
-  return function(callback) {
-    return (byTick || byImmediate || byMessage || byEvent || byTimer)(callback);
-  };
-}();
-
 // Deferred constructor referenced from Mochikit.Async.Deferred
 // http://mochi.github.io/mochikit/
-var Deferred = function() {
+var Deferred = (function() {
 
   var SUCCESS = 0,
       FAILURE = 1,
@@ -123,29 +29,32 @@ var Deferred = function() {
 
   function Deferred(canceller) {
     return this.init(canceller);
-  }
+  };
 
   Deferred.prototype = {
     Deferred: Deferred,
     state: UNFIRED,
     paused: 0,
     chained: false,
-    unhandledErrorTimerId: null,
+    _unhandledErrorTimerId: null,
     init: function(canceller) {
-      var that = this;
-      that.chain = [];
-      that.results = [null, null];
-      that.canceller = canceller;
-      return that;
+      var self = this;
+
+      self.chain = [];
+      self.results = [null, null];
+      self.canceller = canceller;
+      return self;
     },
     cancel: function() {
-      var that = this;
-      if (that.state === UNFIRED) {
-        that.canceller && that.canceller(that);
-      } else if (that.state === FIRED && isDeferred(that.results[SUCCESS])) {
-        that.results[SUCCESS].cancel();
+      var self = this;
+
+      self.chain.length = 0;
+      if (self.state === UNFIRED) {
+        self.canceller && self.canceller(self);
+      } else if (self.state === FIRED && isDeferred(self.results[SUCCESS])) {
+        self.results[SUCCESS].cancel();
       }
-      return that;
+      return self;
     },
     callback: function(res) {
       return prepare.call(this, res);
@@ -163,14 +72,15 @@ var Deferred = function() {
       return this.addCallbacks(null, fn);
     },
     addCallbacks: function(cb, eb) {
-      var that = this;
-      if (!that.chained) {
-        that.chain.push([cb, eb]);
-        if (isFireable(that.state)) {
-          fire.call(that);
+      var self = this;
+
+      if (!self.chained) {
+        self.chain.push([cb, eb]);
+        if (isFireable(self.state)) {
+          fire.call(self);
         }
       }
-      return that;
+      return self;
     }
   };
 
@@ -209,84 +119,101 @@ var Deferred = function() {
 
 
   function prepare(res) {
-    var that = this;
-    setState.call(that, res);
-    that.results[that.state] = res;
-    return fire.call(that);
+    var self = this;
+
+    setState.call(self, res);
+    self.results[self.state] = res;
+    return fire.call(self);
   }
 
 
   function fire() {
-    var that = this,
-        chain = that.chain,
-        res = that.results[that.state],
-        cb, fn, unhandledError;
+    var self = this;
+    var chain = self.chain;
+    var res = self.results[self.state];
+    var cb, fn, unhandledError;
 
-    if (that.unhandledErrorTimerId && isFireable.call(that) && hasErrback.call(that)) {
-      clearTimeout(that.unhandledErrorTimerId);
-      delete that.unhandledErrorTimerId;
+    if (self._unhandledErrorTimerId && isFireable.call(self) && hasErrback.call(self)) {
+      clearTimeout(self._unhandledErrorTimerId);
+      delete self._unhandledErrorTimerId;
     }
 
-    while (chain.length && !that.paused) {
-      fn = chain.shift()[that.state];
+    while (chain.length && !self.paused) {
+      fn = chain.shift()[self.state];
 
       if (!fn) {
         continue;
       }
 
       try {
-        res = fn.call(that, res);
-        setState.call(that, res);
+        res = fn.call(self, res);
+        setState.call(self, res);
 
         if (isDeferred(res)) {
           cb = function(r) {
-            prepare.call(that, r);
-            that.paused--;
-            if (!that.paused && isFireable(that.state)) {
-              fire.call(that);
+            prepare.call(self, r);
+            self.paused--;
+
+            if (!self.paused && isFireable(self.state)) {
+              fire.call(self);
             }
           };
-          that.paused++;
+          self.paused++;
         }
       } catch (e) {
-        that.state = FAILURE;
+        self.state = FAILURE;
         res = error(e);
 
-        if (!hasErrback.call(that)) {
+        if (!hasErrback.call(self)) {
           unhandledError = true;
         }
       }
     }
-    that.results[that.state] = res;
+    self.results[self.state] = res;
 
-    if (cb && that.paused) {
+    if (cb && self.paused) {
       res.addBoth(cb);
       res.chained = true;
     }
 
     if (unhandledError) {
       // Resolve the error implicit in the asynchronous processing.
-      that.unhandledErrorTimerId = setTimeout(function() {
+      self._unhandledErrorTimerId = setTimeout(function() {
         try {
           throw res;
         } finally {
-          delete that.unhandledErrorTimerId;
+          delete self._unhandledErrorTimerId;
         }
       }, 0);
     }
-    return that;
+    return self;
   }
 
   return Deferred;
-
-}();
+}());
 
 // Deferrize jQuery.Deferred. (jquery-2.0.3)
 (function jqDeferrize() {
 
-  var callbacks = 'addCallback addErrback addCallbacks addBoth'.split(' ');
+  var callbacks = 'addCallback addErrback addCallbacks addBoth cancel'.split(' ');
 
-  function addMethods(target, deferred) {
+  function attach(target, deferred) {
+    target._deferred = deferred;
+    deferred._jquery = target;
+
+    target.deferrize = function() {
+      return this._deferred;
+    };
+
+    var cancel_ = deferred.cancel;
+    deferred.cancel = function() {
+      var self = this;
+      if (self._jquery && self._jquery.canceller) {
+        self.canceller = self._jquery.canceller;
+      }
+      return cancel_.apply(self, arguments);
+    };
+
     $.each(callbacks, function(i, fn) {
       target[fn] = function() {
         return deferred[fn].apply(deferred, arguments);
@@ -296,8 +223,7 @@ var Deferred = function() {
   }
 
   function deferrize(target, deferred) {
-    target._deferred = deferred;
-    addMethods(target, deferred);
+    attach(target, deferred);
 
     target.callback = function() {
       return deferred.callback.apply(deferred, arguments);
@@ -311,9 +237,7 @@ var Deferred = function() {
 
     var promise_ = target.promise;
     target.promise = function() {
-      var p = promise_.apply(this, arguments);
-      var d = p._deferred = this._deferred;
-      return addMethods(p, d);
+      return attach(promise_.apply(this, arguments), this._deferred);
     };
 
     return target;
@@ -324,7 +248,101 @@ var Deferred = function() {
     var d = new Deferred();
     return deferrize(Deferred_.apply(this, arguments), d);
   };
+}());
 
+// Call the function asynchronously.
+var nextTick = (function() {
+  var byTick = (function() {
+    if (typeof process === 'object' && typeof process.nextTick === 'function') {
+      return process.nextTick;
+    }
+  }()),
+  byImmediate = (function() {
+    if (typeof setImmediate === 'function') {
+      return function(callback) {
+        try {
+          return setImmediate(callback);
+        } catch (e) {
+          return (byImmediate = byTimer)(callback);
+        }
+      };
+    }
+  }()),
+  byMessage = (function() {
+    var channel, queue;
+
+    if (typeof MessageChannel !== 'function') {
+      return false;
+    }
+
+    try {
+      channel = new MessageChannel();
+      if (!channel.port1 || !channel.port2) {
+        return false;
+      }
+
+      queue = [];
+      channel.port1.onmessage = function() {
+        queue.shift()();
+      };
+    } catch (e) {
+      return false;
+    }
+
+    return function(callback) {
+      queue.push(callback);
+      channel.port2.postMessage('');
+    };
+  }()),
+  byEvent = (function() {
+    if (typeof window !== 'object' || typeof document !== 'object' ||
+        typeof Image !== 'function' ||
+        typeof document.addEventListener !== 'function'
+    ) {
+      return false;
+    }
+
+    try {
+      if (typeof new Image().addEventListener !== 'function') {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    // Dummy 1x1 gif image.
+    var data = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+
+    return function(callback) {
+      var img = new Image();
+      var done = false;
+      var handler = function() {
+        img.removeEventListener('load', handler, false);
+        img.removeEventListener('error', handler, false);
+
+        if (!done) {
+          done = true;
+          callback();
+        }
+      };
+
+      img.addEventListener('load', handler, false);
+      img.addEventListener('error', handler, false);
+
+      try {
+        img.src = data;
+      } catch (e) {
+        (byEvent = byTimer)(callback);
+      }
+    };
+  }()),
+  byTimer = function(callback, msec) {
+    return setTimeout(callback, msec || 0);
+  };
+
+  return function(callback) {
+    return (byTick || byImmediate || byMessage || byEvent || byTimer)(callback);
+  };
 }());
 
 /**
@@ -342,19 +360,21 @@ var Deferred = function() {
  */
 $.async = function(fn) {
   var d = new Deferred();
-  var args, v;
+  var value;
 
   if ($.isFunction(fn)) {
-    args = slice.call(arguments, 1);
+    var args = slice.call(arguments, 1);
     d.addCallback(function() {
       return fn.apply(this, args);
     });
   } else {
-    v = fn;
+    value = fn;
   }
-  lazy(function() {
-    d.callback(v);
+
+  nextTick(function() {
+    d.callback(value);
   });
+
   return d;
 };
 
@@ -541,7 +561,7 @@ $.extend($.async, {
    *    var list = $.async.maybeDeferreds(1, 2, 'foo', 'bar',
    *                                      function() { return 5 },
    *                                      $.async.succeed(100))
-   *    
+   *
    *    console.log(list); // [ 1, 2, ... (deferred instances) ]
    *    list[0].addCallback(function(res) {
    *      console.log(res); // 1
@@ -550,10 +570,8 @@ $.extend($.async, {
    * @param {...*} [...] Variable arguments that convert to the Deferred object.
    * @retrun {array.<Deferred>} Return an array of Deferred.
    */
-  maybeDeferreds: function(/* ... */) {
-    return $.map(slice.call(arguments), function(a) {
-      return $.async.maybeDeferred(a);
-    });
+  maybeDeferreds: function() {
+    return $.map(slice.call(arguments), $.async.maybeDeferred);
   },
   /**
    * Return a new cancellable Deferred that will .callback() after
@@ -611,6 +629,7 @@ $.extend($.async, {
    */
   callLater: function(seconds, func) {
     var args = slice.call(arguments, 2);
+
     return $.async.wait(seconds).addCallback(function() {
       if ($.async.isDeferred(func)) {
         return func.callback.apply(func, args);
@@ -646,20 +665,38 @@ $.extend($.async, {
     var d = new Deferred();
     var args = slice.call(arguments, 1);
     var interval = 13;
+    var locked, done;
 
-    return $.async(function till() {
-      var that = this;
+    var next = function() {
+      if (done) {
+        return;
+      }
+
+      if (locked) {
+        return setTimeout(next, interval);
+      }
+      locked = true;
       var time = $.now();
 
-      if (cond && !cond.apply(this, args)) {
-        setTimeout(function() {
-          till.call(that);
-        }, Math.min(1000, interval + ($.now() - time)));
-      } else {
-        d.callback();
-      }
-      return d;
-    });
+      $.async(function() {
+        return cond.apply(this, args);
+      }).addCallback(function(res) {
+        if (res) {
+          done = true;
+          d.callback();
+        } else {
+          var ms = Math.max(1, Math.min(1000, interval + ($.now() - time)));
+
+          setTimeout(function() {
+            locked = false;
+            next();
+          }, ms);
+        }
+      });
+    }
+
+    $.async(next);
+    return d;
   }
 });
 
